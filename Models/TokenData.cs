@@ -1,6 +1,7 @@
-public class TokenData {
+public class TokenData
+{
     public int Id { get; set; }
     public required string Name { get; set; }
-    public decimal TotalSupply { get; set; }
-    public decimal CirculatingSupply { get; set; }
+    public string? TotalSupply { get; set; }
+    public string? CirculatingSupply { get; set; }
 }

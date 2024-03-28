@@ -22,7 +22,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddDbContext<TokenDbContext>(options =>
-            options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")?? ""));
 
         services.AddControllers();
 
@@ -54,6 +54,11 @@ public class Startup
                 Console.WriteLine("error  in configuring JWT");
             }
         });
+
+        services.AddSingleton<IConfiguration>(Configuration);
+
+        services.AddTransient<BNBChainService>();
+
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

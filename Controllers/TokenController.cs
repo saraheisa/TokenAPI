@@ -1,3 +1,4 @@
+using System.Numerics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,12 +10,16 @@ namespace TokenAPI.Controllers
     {
         private readonly TokenDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly BNBChainService _bnbChainService;
 
-        public TokenController(TokenDbContext context, IConfiguration configuration)
+
+        public TokenController(TokenDbContext context, IConfiguration configuration
+        , BNBChainService bnbChainService
+        )
         {
             _context = context;
             _configuration = configuration;
-
+            _bnbChainService = bnbChainService;
         }
 
         [HttpPost]
@@ -45,25 +50,25 @@ namespace TokenAPI.Controllers
         [HttpPost]
         [Authorize]
         [Route("")]
-        public IActionResult CalculateTokenData()
+        public async Task<IActionResult> CalculateTokenData()
         {
             // Calculate total and circulating supply
-            decimal totalSupply = 1000;
-            decimal nonCirculatingSupply = 20;
-            decimal circulatingSupply = totalSupply - nonCirculatingSupply;
+            BigInteger totalSupply = await _bnbChainService.GetTotalSupplyAsync();
+            BigInteger nonCirculatingSupply = await _bnbChainService.GetNonCirculatingSupplyAsync();
+            BigInteger circulatingSupply = totalSupply - nonCirculatingSupply;
 
             var token = new TokenData
             {
                 Id = 1,
                 Name = "BLP token",
-                TotalSupply = totalSupply,
-                CirculatingSupply = circulatingSupply
+                TotalSupply = totalSupply.ToString(),
+                CirculatingSupply = circulatingSupply.ToString()
             };
 
             _context.TokenData.Update(token);
             _context.SaveChanges();
 
-            return Ok();
+            return Ok(token);
         }
     }
 
