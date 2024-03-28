@@ -20,11 +20,22 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAllOrigins", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
         ConfigureDatabase(services);
         ConfigureControllers(services);
         ConfigureSwagger(services);
         ConfigureJwtAuthentication(services);
         ConfigureTransientServices(services);
+
     }
 
     private void ConfigureDatabase(IServiceCollection services)
@@ -87,6 +98,7 @@ public class Startup
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseCors("AllowAllOrigins");
 
         app.UseEndpoints(endpoints =>
         {

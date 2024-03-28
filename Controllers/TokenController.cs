@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TokenAPI.Controllers
 {
     [ApiController]
-    [Route("api/token")]
+    [Route("api")]
     public class TokenController : ControllerBase
     {
         private readonly TokenDbContext _context;
@@ -29,7 +29,7 @@ namespace TokenAPI.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("")]
+        [Route("token")]
         public IActionResult GetTokenData()
         {
             var tokenData = _context.TokenData.FirstOrDefault();
@@ -38,7 +38,7 @@ namespace TokenAPI.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("")]
+        [Route("token")]
         public async Task<IActionResult> CalculateTokenData()
         {
             try
