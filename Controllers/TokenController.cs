@@ -9,26 +9,24 @@ namespace TokenAPI.Controllers
     public class TokenController : ControllerBase
     {
         private readonly TokenDbContext _context;
-        private readonly IConfiguration _configuration;
         private readonly BNBChainService _bnbChainService;
 
+        private readonly JWTTokenService _jwtTokenService;
 
-        public TokenController(TokenDbContext context, IConfiguration configuration
+        public TokenController(TokenDbContext context, JWTTokenService jWTTokenService
         , BNBChainService bnbChainService
         )
         {
             _context = context;
-            _configuration = configuration;
             _bnbChainService = bnbChainService;
+            _jwtTokenService = jWTTokenService;
         }
 
         [HttpPost]
         [Route("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
-            var tokenService = new TokenService(_configuration);
-
-            var token = tokenService.GenerateToken(model.Username);
+            var token = _jwtTokenService.GenerateToken(model.Username);
 
             return Ok(new { token });
         }

@@ -55,9 +55,8 @@ public class Startup
             }
         });
 
-        services.AddSingleton<IConfiguration>(Configuration);
-
         services.AddTransient<BNBChainService>();
+        services.AddTransient<JWTTokenService>();
 
     }
 
