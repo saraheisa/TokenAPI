@@ -9,11 +9,7 @@ public class BNBChainService
 
     public BNBChainService(IConfiguration configuration)
     {
-        _apiKey = configuration["bscscan:ApiKey"] ?? "";
-        if (string.IsNullOrEmpty(_apiKey))
-        {
-            throw new InvalidOperationException("API key is missing or empty. Please provide a valid API key.");
-        }
+        _apiKey = configuration["bscscan:ApiKey"] ?? throw new InvalidOperationException("API key is missing or empty. Please provide a valid API key.");
     }
 
     public async Task<BigInteger> GetTotalSupplyAsync()

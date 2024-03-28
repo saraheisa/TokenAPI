@@ -14,32 +14,45 @@ public class Startup
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
-        Console.WriteLine("configs: " + Configuration);
     }
 
     public IConfiguration Configuration { get; }
 
     public void ConfigureServices(IServiceCollection services)
     {
+        ConfigureDatabase(services);
+        ConfigureControllers(services);
+        ConfigureSwagger(services);
+        ConfigureJwtAuthentication(services);
+        ConfigureTransientServices(services);
+    }
+
+    private void ConfigureDatabase(IServiceCollection services)
+    {
         services.AddDbContext<TokenDbContext>(options =>
-            options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")?? ""));
+            options.UseMySQL(Configuration.GetConnectionString("DefaultConnection") ?? ""));
+    }
 
-        services.AddControllers();
+    private void ConfigureControllers(IServiceCollection services)
+    {
+        services.AddControllersWithViews();
+    }
 
+    private void ConfigureSwagger(IServiceCollection services)
+    {
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "TokenAPI", Version = "v1" });
         });
+    }
 
+    private void ConfigureJwtAuthentication(IServiceCollection services)
+    {
+        string jwtKey = Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT secret key is missing or empty. Please provide a valid JWT secret key.");
 
-
-        _ = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            string? jwtKey = Configuration["Jwt:Key"];
-            if (jwtKey != null)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
@@ -48,16 +61,13 @@ public class Startup
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
                 };
-            }
-            else
-            {
-                Console.WriteLine("error  in configuring JWT");
-            }
-        });
+            });
+    }
 
+    private void ConfigureTransientServices(IServiceCollection services)
+    {
         services.AddTransient<BNBChainService>();
         services.AddTransient<JWTTokenService>();
-
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -67,8 +77,6 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        app.UseAuthentication();
-
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
@@ -77,11 +85,12 @@ public class Startup
         });
 
         app.UseRouting();
+        app.UseAuthentication();
         app.UseAuthorization();
+
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
         });
-
     }
 }

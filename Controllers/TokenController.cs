@@ -10,16 +10,13 @@ namespace TokenAPI.Controllers
     {
         private readonly TokenDbContext _context;
         private readonly BNBChainService _bnbChainService;
-
         private readonly JWTTokenService _jwtTokenService;
 
-        public TokenController(TokenDbContext context, JWTTokenService jWTTokenService
-        , BNBChainService bnbChainService
-        )
+        public TokenController(TokenDbContext context, JWTTokenService jWTTokenService, BNBChainService bnbChainService)
         {
             _context = context;
-            _bnbChainService = bnbChainService;
             _jwtTokenService = jWTTokenService;
+            _bnbChainService = bnbChainService;
         }
 
         [HttpPost]
@@ -27,7 +24,6 @@ namespace TokenAPI.Controllers
         public IActionResult Login([FromBody] LoginModel model)
         {
             var token = _jwtTokenService.GenerateToken(model.Username);
-
             return Ok(new { token });
         }
 
@@ -37,12 +33,7 @@ namespace TokenAPI.Controllers
         public IActionResult GetTokenData()
         {
             var tokenData = _context.TokenData.FirstOrDefault();
-
-            if (tokenData == null)
-            {
-                return NotFound();
-            }
-            return Ok(tokenData);
+            return tokenData != null ? Ok(tokenData) : NotFound();
         }
 
         [HttpPost]
@@ -50,24 +41,34 @@ namespace TokenAPI.Controllers
         [Route("")]
         public async Task<IActionResult> CalculateTokenData()
         {
-            // Calculate total and circulating supply
-            BigInteger totalSupply = await _bnbChainService.GetTotalSupplyAsync();
-            BigInteger nonCirculatingSupply = await _bnbChainService.GetNonCirculatingSupplyAsync();
-            BigInteger circulatingSupply = totalSupply - nonCirculatingSupply;
-
-            var token = new TokenData
+            try
             {
-                Id = 1,
-                Name = "BLP token",
-                TotalSupply = totalSupply.ToString(),
-                CirculatingSupply = circulatingSupply.ToString()
-            };
+                var totalSupplyTask = _bnbChainService.GetTotalSupplyAsync();
+                var nonCirculatingSupplyTask = _bnbChainService.GetNonCirculatingSupplyAsync();
 
-            _context.TokenData.Update(token);
-            _context.SaveChanges();
+                await Task.WhenAll(totalSupplyTask, nonCirculatingSupplyTask);
 
-            return Ok(token);
+                BigInteger totalSupply = await totalSupplyTask;
+                BigInteger nonCirculatingSupply = await nonCirculatingSupplyTask;
+                BigInteger circulatingSupply = totalSupply - nonCirculatingSupply;
+
+                var tokenData = new TokenData
+                {
+                    Id = 1,
+                    Name = "BLP token",
+                    TotalSupply = totalSupply.ToString(),
+                    CirculatingSupply = circulatingSupply.ToString()
+                };
+
+                _context.TokenData.Update(tokenData);
+                _context.SaveChanges();
+
+                return Ok(tokenData);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
         }
     }
-
 }
