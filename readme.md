@@ -3,6 +3,9 @@
 ## Overview:
 The BLP Token Supply API is a simple ASP.NET Web API designed to operate with the supply of the BLP (BullPerks) token on the Binance Smart Chain (BSC). It provides endpoints for retrieving token data, calculating token supplies, and JWT-based authentication for accessing restricted endpoints.
 
+## Demo
+[Demo link](https://master--helpful-sunburst-4fbe90.netlify.app)
+
 ## Features:
 1. **JWT Authentication**: The API supports JWT-based authentication for secure access to restricted endpoints.
 2. **Token Data Endpoint**: An endpoint is provided to retrieve stored token data, including the name, total supply, and circulating supply of the BLP token.
