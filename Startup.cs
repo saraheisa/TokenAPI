@@ -59,7 +59,7 @@ public class Startup
 
     private void ConfigureJwtAuthentication(IServiceCollection services)
     {
-        string jwtKey = Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT secret key is missing or empty. Please provide a valid JWT secret key.");
+        string jwtKey = Configuration["Jwt"] ?? throw new InvalidOperationException("JWT secret key is missing or empty. Please provide a valid JWT secret key.");
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

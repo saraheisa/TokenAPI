@@ -11,9 +11,9 @@ public class JWTTokenService
 
     public JWTTokenService(IConfiguration configuration)
     {
-        _jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT secret key is missing or empty. Please provide a valid JWT secret key.");
-        _issuer = configuration["Jwt:Issuer"] ?? "";
-        _audience = configuration["Jwt:Audience"] ?? "";
+        _jwtKey = configuration["Jwt"] ?? throw new InvalidOperationException("JWT secret key is missing or empty. Please provide a valid JWT secret key.");
+        _issuer = configuration["JwtIssuer"] ?? "";
+        _audience = configuration["JwtAudience"] ?? "";
     }
 
     public string GenerateToken(string username)
